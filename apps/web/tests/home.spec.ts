@@ -1,0 +1,1 @@
+import {test,expect} from '@playwright/test';test('home apresenta ações principais',async({page})=>{await page.goto('/');await expect(page.getByRole('heading',{name:/Ajude um animal/i})).toBeVisible();await expect(page.getByRole('link',{name:/Perdi meu animal/i})).toBeVisible();await expect(page.getByRole('link',{name:/Encontrei um animal/i})).toBeVisible()});

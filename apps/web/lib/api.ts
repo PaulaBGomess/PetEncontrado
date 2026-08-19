@@ -1,0 +1,3 @@
+export const API=process.env.NEXT_PUBLIC_API_URL||'http://localhost:3333/api/v1'; export const SERVER=API.replace(/\/api\/v1$/,'');
+export async function apiFetch(path:string,init:RequestInit={},token?:string){const headers=new Headers(init.headers);if(token)headers.set('Authorization',`Bearer ${token}`);if(!(init.body instanceof FormData)&&init.body)headers.set('Content-Type','application/json');const res=await fetch(`${API}${path}`,{...init,headers,credentials:'include'});if(!res.ok){let msg='Erro na requisição';try{const b=await res.json();msg=Array.isArray(b.message)?b.message.join(', '):b.message||msg}catch{}throw new Error(msg)} if(res.status===204)return null;return res.json()}
+export const imageUrl=(url?:string)=>url?`${SERVER}${url}`:'/pet-placeholder.svg';

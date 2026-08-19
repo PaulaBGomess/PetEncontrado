@@ -1,0 +1,54 @@
+{
+  "name": "@pet/api",
+  "version": "2.0.0",
+  "private": true,
+  "scripts": {
+    "start:dev": "nest start --watch",
+    "build": "nest build",
+    "start:prod": "node dist/main.js",
+    "test": "jest --runInBand",
+    "test:watch": "jest --watch",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:seed": "prisma db seed"
+  },
+  "dependencies": {
+    "@nestjs/common": "latest",
+    "@nestjs/config": "latest",
+    "@nestjs/core": "latest",
+    "@nestjs/jwt": "latest",
+    "@nestjs/passport": "latest",
+    "@nestjs/platform-express": "latest",
+    "@nestjs/swagger": "latest",
+    "@nestjs/throttler": "latest",
+    "@prisma/client": "latest",
+    "bcrypt": "latest",
+    "class-transformer": "latest",
+    "class-validator": "latest",
+    "cookie-parser": "latest",
+    "helmet": "latest",
+    "multer": "latest",
+    "passport": "latest",
+    "passport-jwt": "latest",
+    "reflect-metadata": "latest",
+    "rxjs": "latest",
+    "prisma": "latest"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "latest",
+    "@nestjs/testing": "latest",
+    "@types/bcrypt": "latest",
+    "@types/cookie-parser": "latest",
+    "@types/express": "latest",
+    "@types/jest": "latest",
+    "@types/multer": "latest",
+    "@types/passport-jwt": "latest",
+    "jest": "latest",
+    "ts-jest": "latest",
+    "ts-node": "latest",
+    "typescript": "latest"
+  },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
+  }
+}

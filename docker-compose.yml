@@ -1,0 +1,61 @@
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: petencontrado_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-petuser}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-petpass}
+      POSTGRES_DB: ${POSTGRES_DB:-petencontrado}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pet_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-petuser} -d ${POSTGRES_DB:-petencontrado}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: petencontrado_api
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3333
+      DATABASE_URL: postgresql://${POSTGRES_USER:-petuser}:${POSTGRES_PASSWORD:-petpass}@db:5432/${POSTGRES_DB:-petencontrado}?schema=public
+      WEB_URL: http://localhost:3000
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      ACCESS_TOKEN_TTL: ${ACCESS_TOKEN_TTL:-15m}
+      REFRESH_TOKEN_DAYS: ${REFRESH_TOKEN_DAYS:-7}
+    ports:
+      - "3333:3333"
+    volumes:
+      - pet_uploads:/app/apps/api/uploads
+    command: sh -c "npx prisma migrate deploy && node dist/main.js"
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:3333/api/v1
+    container_name: petencontrado_web
+    restart: unless-stopped
+    depends_on:
+      - api
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:3333/api/v1
+    ports:
+      - "3000:3000"
+
+volumes:
+  pet_pgdata:
+  pet_uploads:

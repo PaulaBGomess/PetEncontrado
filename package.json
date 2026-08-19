@@ -1,0 +1,22 @@
+{
+  "name": "pet-encontrado-v2",
+  "version": "2.0.0",
+  "private": true,
+  "workspaces": ["apps/*"],
+  "scripts": {
+    "dev:web": "npm --workspace @pet/web run dev",
+    "dev:api": "npm --workspace @pet/api run start:dev",
+    "dev": "concurrently -n WEB,API \"npm run dev:web\" \"npm run dev:api\"",
+    "build": "npm --workspace @pet/api run build && npm --workspace @pet/web run build",
+    "test": "npm --workspace @pet/api run test",
+    "test:e2e": "npm --workspace @pet/web run test:e2e",
+    "db:generate": "npm --workspace @pet/api run prisma:generate",
+    "db:migrate": "npm --workspace @pet/api run prisma:migrate",
+    "db:seed": "npm --workspace @pet/api run prisma:seed",
+    "docker:up": "docker compose up -d --build",
+    "docker:down": "docker compose down"
+  },
+  "devDependencies": {
+    "concurrently": "latest"
+  }
+}

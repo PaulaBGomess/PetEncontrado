@@ -1,0 +1,162 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  BLOCKED
+}
+
+enum Situation {
+  LOST
+  FOUND
+  REUNITED
+  CLOSED
+}
+
+enum Sex {
+  MALE
+  FEMALE
+  UNKNOWN
+}
+
+enum Size {
+  SMALL
+  MEDIUM
+  LARGE
+  UNKNOWN
+}
+
+model User {
+  id                  String               @id @default(uuid())
+  name                String
+  email               String               @unique
+  phone               String?
+  whatsapp            String?
+  city                String?
+  state               String?
+  passwordHash        String
+  role                 Role                 @default(USER)
+  status               UserStatus           @default(ACTIVE)
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
+  animals              Animal[]
+  sightings            Sighting[]
+  refreshTokens        RefreshToken[]
+  passwordResetTokens  PasswordResetToken[]
+  auditLogs            AuditLog[]            @relation("AuditActor")
+}
+
+model Animal {
+  id              String       @id @default(uuid())
+  ownerId         String
+  owner           User         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  name            String?
+  species         String
+  breed           String?
+  sex             Sex          @default(UNKNOWN)
+  size            Size         @default(UNKNOWN)
+  color           String
+  approximateAge  String?
+  description     String?
+  specialMarks    String?
+  situation       Situation
+  occurrenceDate  DateTime
+  street          String?
+  neighborhood    String
+  city            String
+  state           String
+  referencePoint  String?
+  latitude        Decimal?     @db.Decimal(10, 7)
+  longitude       Decimal?     @db.Decimal(10, 7)
+  contactName     String
+  contactPhone    String?
+  contactWhatsapp String?
+  contactEmail    String?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  images          AnimalImage[]
+  sightings       Sighting[]
+
+  @@index([situation, city])
+  @@index([species, color])
+  @@index([ownerId])
+  @@index([createdAt])
+}
+
+model AnimalImage {
+  id        String   @id @default(uuid())
+  animalId  String
+  animal    Animal   @relation(fields: [animalId], references: [id], onDelete: Cascade)
+  url       String
+  createdAt DateTime @default(now())
+}
+
+model Sighting {
+  id             String   @id @default(uuid())
+  animalId       String
+  animal         Animal   @relation(fields: [animalId], references: [id], onDelete: Cascade)
+  reporterId     String
+  reporter       User     @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+  sightingDate   DateTime
+  approximateTime String?
+  street         String?
+  neighborhood   String
+  city           String
+  state          String
+  referencePoint String?
+  description    String?
+  photoUrl       String?
+  createdAt      DateTime @default(now())
+
+  @@index([animalId])
+  @@index([reporterId])
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String   @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  actorId    String?
+  actor      User?    @relation("AuditActor", fields: [actorId], references: [id], onDelete: SetNull)
+  action     String
+  entityType String
+  entityId   String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  @@index([actorId])
+  @@index([createdAt])
+}
