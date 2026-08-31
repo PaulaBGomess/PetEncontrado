@@ -1,8 +1,108 @@
-import { Body,Controller,HttpCode,Post,Req,Res } from '@nestjs/common'; import { ApiTags } from '@nestjs/swagger'; import { Request,Response } from 'express'; import { Throttle } from '@nestjs/throttler'; import { Public } from '../common/public.decorator'; import { AuthService } from './auth.service'; import { ForgotPasswordDto,LoginDto,RegisterDto,ResetPasswordDto } from './dto';
-@ApiTags('Autenticação') @Controller('auth') export class AuthController{constructor(private service:AuthService){} private cookie(res:Response,token:string){res.cookie('pet_refresh',token,{httpOnly:true,secure:process.env.NODE_ENV==='production',sameSite:'lax',maxAge:Number(process.env.REFRESH_TOKEN_DAYS||7)*86400000,path:'/api/v1/auth'});}
- @Public() @Throttle({default:{limit:5,ttl:60000}}) @Post('register') async register(@Body() dto:RegisterDto,@Res({passthrough:true}) res:Response){const r=await this.service.register(dto);this.cookie(res,r.refreshToken); const {refreshToken,...body}=r; return body}
- @Public() @Throttle({default:{limit:5,ttl:60000}}) @HttpCode(200) @Post('login') async login(@Body() dto:LoginDto,@Res({passthrough:true}) res:Response){const r=await this.service.login(dto);this.cookie(res,r.refreshToken); const {refreshToken,...body}=r; return body}
- @Public() @HttpCode(200) @Post('refresh') async refresh(@Req() req:Request,@Res({passthrough:true}) res:Response){const r=await this.service.renew(req.cookies?.pet_refresh);this.cookie(res,r.refreshToken);const {refreshToken,...body}=r;return body}
- @Public() @HttpCode(200) @Post('logout') async logout(@Req() req:Request,@Res({passthrough:true}) res:Response){const r=await this.service.logout(req.cookies?.pet_refresh);res.clearCookie('pet_refresh',{path:'/api/v1/auth'});return r}
- @Public() @Throttle({default:{limit:3,ttl:60000}}) @HttpCode(200) @Post('forgot-password') forgot(@Body() dto:ForgotPasswordDto){return this.service.forgot(dto)}
- @Public() @HttpCode(200) @Post('reset-password') reset(@Body() dto:ResetPasswordDto){return this.service.reset(dto)} }
+import { Body, Controller, Get, HttpCode, Post, Query, Req, Res } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
+import { Request, Response } from 'express';
+import { Throttle } from '@nestjs/throttler';
+import { Public } from '../common/public.decorator';
+import { AuthService } from './auth.service';
+import { ForgotPasswordDto, LoginDto, RegisterDto, ResetPasswordDto } from './dto';
+
+@ApiTags('Autenticação')
+@Controller('auth')
+export class AuthController {
+  constructor(private service: AuthService) {}
+
+  private cookie(res: Response, token: string) {
+    res.cookie('pet_refresh', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: Number(process.env.REFRESH_TOKEN_DAYS || 7) * 86400000,
+      path: '/api/v1/auth',
+    });
+  }
+
+  @Public()
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @Post('register')
+  async register(@Body() dto: RegisterDto, @Res({ passthrough: true }) res: Response) {
+    const r = await this.service.register(dto);
+    this.cookie(res, r.refreshToken);
+    const { refreshToken, ...body } = r;
+    return body;
+  }
+
+  @Public()
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @HttpCode(200)
+  @Post('login')
+  async login(@Body() dto: LoginDto, @Res({ passthrough: true }) res: Response) {
+    const r = await this.service.login(dto);
+    this.cookie(res, r.refreshToken);
+    const { refreshToken, ...body } = r;
+    return body;
+  }
+
+  @Public()
+  @HttpCode(200)
+  @Post('refresh')
+  async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    const r = await this.service.renew(req.cookies?.pet_refresh);
+    this.cookie(res, r.refreshToken);
+    const { refreshToken, ...body } = r;
+    return body;
+  }
+
+  @Public()
+  @HttpCode(200)
+  @Post('logout')
+  async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    const r = await this.service.logout(req.cookies?.pet_refresh);
+    res.clearCookie('pet_refresh', { path: '/api/v1/auth' });
+    return r;
+  }
+
+  @Public()
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
+  @HttpCode(200)
+  @Post('forgot-password')
+  forgot(@Body() dto: ForgotPasswordDto) {
+    return this.service.forgot(dto);
+  }
+
+  @Public()
+  @HttpCode(200)
+  @Post('reset-password')
+  reset(@Body() dto: ResetPasswordDto) {
+    return this.service.reset(dto);
+  }
+
+  @Public()
+  @Get('google')
+  async google(@Res() res: Response) {
+    return res.redirect(await this.service.socialAuthorizationUrl('GOOGLE'));
+  }
+
+  @Public()
+  @Get('google/callback')
+  async googleCallback(@Query('code') code: string, @Query('state') state: string, @Res() res: Response) {
+    const r = await this.service.socialCallback('GOOGLE', code, state);
+    this.cookie(res, r.refreshToken);
+    const web = (process.env.WEB_URL || 'http://localhost:3000').replace(/\/$/, '');
+    return res.redirect(`${web}/auth/social-callback?role=${encodeURIComponent(r.user.role)}`);
+  }
+
+  @Public()
+  @Get('facebook')
+  async facebook(@Res() res: Response) {
+    return res.redirect(await this.service.socialAuthorizationUrl('FACEBOOK'));
+  }
+
+  @Public()
+  @Get('facebook/callback')
+  async facebookCallback(@Query('code') code: string, @Query('state') state: string, @Res() res: Response) {
+    const r = await this.service.socialCallback('FACEBOOK', code, state);
+    this.cookie(res, r.refreshToken);
+    const web = (process.env.WEB_URL || 'http://localhost:3000').replace(/\/$/, '');
+    return res.redirect(`${web}/auth/social-callback?role=${encodeURIComponent(r.user.role)}`);
+  }
+}
