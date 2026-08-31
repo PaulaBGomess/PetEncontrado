@@ -12,9 +12,14 @@ export class AuthController {
   constructor(private service: AuthService) {}
 
   private cookie(res: Response, token: string) {
+    const webUrl = process.env.WEB_URL || 'http://localhost:3000';
+    const secure = process.env.COOKIE_SECURE
+      ? process.env.COOKIE_SECURE === 'true'
+      : process.env.NODE_ENV === 'production' && webUrl.startsWith('https://');
+
     res.cookie('pet_refresh', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure,
       sameSite: 'lax',
       maxAge: Number(process.env.REFRESH_TOKEN_DAYS || 7) * 86400000,
       path: '/api/v1/auth',
