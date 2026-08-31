@@ -37,6 +37,11 @@ enum Size {
   UNKNOWN
 }
 
+enum SocialProvider {
+  GOOGLE
+  FACEBOOK
+}
+
 model User {
   id                  String               @id @default(uuid())
   name                String
@@ -45,7 +50,7 @@ model User {
   whatsapp            String?
   city                String?
   state               String?
-  passwordHash        String
+  passwordHash        String?
   role                 Role                 @default(USER)
   status               UserStatus           @default(ACTIVE)
   createdAt            DateTime             @default(now())
@@ -54,7 +59,24 @@ model User {
   sightings            Sighting[]
   refreshTokens        RefreshToken[]
   passwordResetTokens  PasswordResetToken[]
+  socialAccounts       SocialAccount[]
   auditLogs            AuditLog[]            @relation("AuditActor")
+}
+
+model SocialAccount {
+  id                String         @id @default(uuid())
+  userId            String
+  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider          SocialProvider
+  providerAccountId String
+  email             String?
+  name              String?
+  profileImage      String?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
 }
 
 model Animal {
@@ -103,21 +125,21 @@ model AnimalImage {
 }
 
 model Sighting {
-  id             String   @id @default(uuid())
-  animalId       String
-  animal         Animal   @relation(fields: [animalId], references: [id], onDelete: Cascade)
-  reporterId     String
-  reporter       User     @relation(fields: [reporterId], references: [id], onDelete: Cascade)
-  sightingDate   DateTime
+  id              String   @id @default(uuid())
+  animalId        String
+  animal          Animal   @relation(fields: [animalId], references: [id], onDelete: Cascade)
+  reporterId      String
+  reporter        User     @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+  sightingDate    DateTime
   approximateTime String?
-  street         String?
-  neighborhood   String
-  city           String
-  state          String
-  referencePoint String?
-  description    String?
-  photoUrl       String?
-  createdAt      DateTime @default(now())
+  street          String?
+  neighborhood    String
+  city            String
+  state           String
+  referencePoint  String?
+  description     String?
+  photoUrl        String?
+  createdAt       DateTime @default(now())
 
   @@index([animalId])
   @@index([reporterId])
