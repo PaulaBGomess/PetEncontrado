@@ -10,13 +10,18 @@ Sistema web completo para cadastro e busca de animais perdidos e encontrados. A 
 - **Segurança:** bcrypt, JWT access/refresh, cookie HttpOnly, RBAC, ValidationPipe, Helmet, CORS, rate limiting
 - **Testes:** Jest + Playwright
 - **Infra:** Docker / Docker Compose
+- **Mapas:** OpenStreetMap
+- **Autenticação social:** Google OAuth 2.0 e Facebook Login
 
 ## Funcionalidades
 
 - Cadastro, login, refresh e logout
+- Login social com Google e Facebook
+- Vinculação de conta social por e-mail
 - Recuperação de senha com token temporário
 - Usuário comum e administrador
 - Cadastro de animais perdidos/encontrados
+- Localização por latitude/longitude com visualização no OpenStreetMap
 - Upload de até 5 fotos
 - Pesquisa e filtros
 - Detalhes do animal
@@ -25,6 +30,7 @@ Sistema web completo para cadastro e busca de animais perdidos e encontrados. A 
 - Minha Conta / Meus Anúncios
 - Marcar como reunido ou encerrar anúncio
 - Dashboard administrativo
+- Gerenciamento de perfis USER/ADMIN
 - Bloqueio/desbloqueio de usuários
 - Logs de auditoria
 - Swagger
@@ -83,6 +89,49 @@ Acessos:
 - Front-end: `http://localhost:3000`
 - API: `http://localhost:3333/api/v1`
 - Swagger: `http://localhost:3333/docs`
+
+## Login social
+
+O projeto possui fluxo de autenticação social para Google e Facebook. As credenciais dos provedores não devem ser versionadas no GitHub; configure-as somente no arquivo `.env` local ou no ambiente de produção.
+
+### Google
+
+Crie um cliente OAuth 2.0 no Google Cloud Console e cadastre como URI de redirecionamento autorizada:
+
+```text
+http://localhost:3333/api/v1/auth/google/callback
+```
+
+Depois preencha no `.env`:
+
+```env
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+GOOGLE_CALLBACK_URL=http://localhost:3333/api/v1/auth/google/callback
+```
+
+O fluxo solicita apenas os escopos `openid`, `email` e `profile`, suficientes para identificar o usuário e obter nome, e-mail e imagem de perfil autorizados pela conta.
+
+### Facebook
+
+Crie um aplicativo no Meta for Developers com Facebook Login e cadastre como URI OAuth válida:
+
+```text
+http://localhost:3333/api/v1/auth/facebook/callback
+```
+
+Depois preencha no `.env`:
+
+```env
+FACEBOOK_APP_ID=
+FACEBOOK_APP_SECRET=
+FACEBOOK_GRAPH_VERSION=v23.0
+FACEBOOK_CALLBACK_URL=http://localhost:3333/api/v1/auth/facebook/callback
+```
+
+A conta Facebook deve disponibilizar um e-mail para que o PetEncontrado consiga identificar ou criar o usuário.
+
+> Login social não concede acesso à caixa de entrada do Gmail ou às mensagens do Facebook. O sistema usa apenas os dados de perfil autorizados pelo usuário durante o login.
 
 ## Usuários de demonstração
 
