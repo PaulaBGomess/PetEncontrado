@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { FormEvent, useState } from 'react';
+import { Eye, EyeOff, PawPrint } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { useAuth } from '@/components/AuthProvider';
 
@@ -32,55 +33,45 @@ export default function Login() {
 
   return <>
     <Header />
-    <div className="form-shell">
-      <form className="panel" onSubmit={submit} style={{maxWidth:520,margin:'0 auto'}}>
-        <div style={{textAlign:'center',marginBottom:24}}>
-          <div style={{fontSize:42}}>🐾</div>
-          <h1 className="form-title">Bem-vindo ao PetEncontrado</h1>
-          <p className="form-sub">Entre para gerenciar seus anúncios, avistamentos e informações da sua conta.</p>
+    <main className="auth-page">
+      <form className="auth-card" onSubmit={submit}>
+        <div className="auth-brand">
+          <Link className="brand" href="/">
+            <span className="brand-icon"><PawPrint size={21}/></span>
+            <span>PetEncontrado</span>
+          </Link>
         </div>
+        <h1 className="auth-title">Bem-vindo de volta!</h1>
+        <p className="auth-sub">Faça login para continuar ajudando.</p>
 
         {error && <div className="error">{error}</div>}
 
-        <div className="form-grid">
-          <div className="field full">
-            <label>E-mail</label>
-            <input name="email" type="email" required autoComplete="email" placeholder="voce@email.com" />
-          </div>
-          <div className="field full">
-            <label>Senha</label>
-            <div style={{display:'flex',gap:8}}>
-              <input style={{flex:1}} name="password" type={showPassword?'text':'password'} required autoComplete="current-password" placeholder="Sua senha" />
-              <button type="button" className="btn" onClick={()=>setShowPassword(v=>!v)} aria-label={showPassword?'Ocultar senha':'Mostrar senha'}>
-                {showPassword?'Ocultar':'Mostrar'}
-              </button>
-            </div>
+        <div className="field">
+          <label>E-mail</label>
+          <input name="email" type="email" required autoComplete="email" placeholder="seuemail@exemplo.com" />
+        </div>
+        <div className="field">
+          <label>Senha</label>
+          <div className="password-wrap">
+            <input name="password" type={showPassword ? 'text' : 'password'} required autoComplete="current-password" placeholder="Digite sua senha" />
+            <button type="button" className="btn" onClick={()=>setShowPassword(v=>!v)} aria-label={showPassword?'Ocultar senha':'Mostrar senha'}>
+              {showPassword ? <EyeOff size={18}/> : <Eye size={18}/>} 
+            </button>
           </div>
         </div>
 
-        <div style={{display:'flex',justifyContent:'flex-end',margin:'8px 0 16px'}}>
-          <Link href="/esqueci-senha">Esqueci minha senha</Link>
+        <div className="auth-forgot"><Link href="/esqueci-senha">Esqueci minha senha</Link></div>
+
+        <button className="btn primary full-button" disabled={loading}>{loading ? 'Entrando...' : 'Entrar'}</button>
+
+        <div className="auth-divider">ou entre com</div>
+        <div className="social-grid">
+          <a className="social-btn" href={`${API}/auth/google`}>🇬 &nbsp; Google</a>
+          <a className="social-btn" href={`${API}/auth/facebook`}>ⓕ &nbsp; Facebook</a>
         </div>
 
-        <button className="btn primary" disabled={loading} style={{width:'100%'}}>
-          {loading ? 'Entrando...' : 'Entrar'}
-        </button>
-
-        <div style={{display:'flex',alignItems:'center',gap:12,margin:'22px 0',color:'#64748b'}}>
-          <span style={{height:1,background:'#e2e8f0',flex:1}} />
-          <span>ou continue com</span>
-          <span style={{height:1,background:'#e2e8f0',flex:1}} />
-        </div>
-
-        <div style={{display:'grid',gap:10}}>
-          <a className="btn" href={`${API}/auth/google`} style={{textAlign:'center',textDecoration:'none'}}>G&nbsp;&nbsp;Continuar com Google</a>
-          <a className="btn" href={`${API}/auth/facebook`} style={{textAlign:'center',textDecoration:'none'}}>f&nbsp;&nbsp;Continuar com Facebook</a>
-        </div>
-
-        <p className="form-sub" style={{marginTop:22,textAlign:'center'}}>
-          Ainda não possui conta? <Link href="/cadastro">Criar conta</Link>
-        </p>
+        <p className="auth-footer">Ainda não tem conta? <Link href="/cadastro">Cadastre-se</Link></p>
       </form>
-    </div>
+    </main>
   </>;
 }
