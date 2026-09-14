@@ -1,1 +1,53 @@
-import { Body,Controller,Get,Param,Patch } from '@nestjs/common'; import { ApiBearerAuth,ApiTags } from '@nestjs/swagger'; import { Role } from '@prisma/client'; import { Roles } from '../common/roles.decorator'; import { CurrentUser,JwtUser } from '../common/current-user.decorator'; import { AdminService } from './admin.service'; import { UserStatusDto } from './dto'; @ApiTags('Administração') @ApiBearerAuth() @Roles(Role.ADMIN) @Controller('admin') export class AdminController{constructor(private service:AdminService){} @Get('dashboard') dashboard(){return this.service.dashboard()} @Get('users') users(){return this.service.users()} @Get('animals') animals(){return this.service.animals()} @Patch('users/:id/status') userStatus(@Param('id') id:string,@Body() dto:UserStatusDto,@CurrentUser() u:JwtUser){return this.service.userStatus(id,dto.status,u.sub)} @Get('audit-logs') logs(){return this.service.logs()}}
+import { Body, Controller, Get, Param, Patch } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { Role } from '@prisma/client';
+import { Roles } from '../common/roles.decorator';
+import { CurrentUser, JwtUser } from '../common/current-user.decorator';
+import { AdminService } from './admin.service';
+import { UserRoleDto, UserStatusDto } from './dto';
+
+@ApiTags('Administração')
+@ApiBearerAuth()
+@Roles(Role.ADMIN)
+@Controller('admin')
+export class AdminController {
+  constructor(private service: AdminService) {}
+
+  @Get('dashboard')
+  dashboard() {
+    return this.service.dashboard();
+  }
+
+  @Get('users')
+  users() {
+    return this.service.users();
+  }
+
+  @Get('animals')
+  animals() {
+    return this.service.animals();
+  }
+
+  @Patch('users/:id/status')
+  userStatus(
+    @Param('id') id: string,
+    @Body() dto: UserStatusDto,
+    @CurrentUser() u: JwtUser,
+  ) {
+    return this.service.userStatus(id, dto.status, u.sub);
+  }
+
+  @Patch('users/:id/role')
+  userRole(
+    @Param('id') id: string,
+    @Body() dto: UserRoleDto,
+    @CurrentUser() u: JwtUser,
+  ) {
+    return this.service.userRole(id, dto.role, u.sub);
+  }
+
+  @Get('audit-logs')
+  logs() {
+    return this.service.logs();
+  }
+}
