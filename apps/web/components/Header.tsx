@@ -1,2 +1,46 @@
-"use client";import Link from 'next/link';import {Menu,PawPrint,X} from 'lucide-react';import {useState} from 'react';import {useAuth} from './AuthProvider';
-export function Header(){const[o,setO]=useState(false);const{user,logout}=useAuth();return <header className="header"><div className="container nav"><Link className="brand" href="/"><span className="brand-icon"><PawPrint size={21}/></span><span>PetEncontrado</span></Link><nav className={o?'navlinks open':'navlinks'}><Link href="/animais?situation=LOST">Perdidos</Link><Link href="/animais?situation=FOUND">Encontrados</Link>{user&&<Link href="/cadastrar-animal">Cadastrar ocorrência</Link>}{user&&<Link href="/meus-anuncios">Minha conta</Link>}{user?.role==='ADMIN'&&<Link href="/admin">Admin</Link>}{user?<button className="link-button" onClick={()=>logout()}>Sair</button>:<><Link href="/login">Entrar</Link><Link className="nav-cta" href="/cadastro">Criar conta</Link></>}</nav><button className="mobile-menu" onClick={()=>setO(!o)} aria-label="Abrir menu">{o?<X/>:<Menu/>}</button></div></header>}
+"use client";
+
+import Link from 'next/link';
+import { Menu, PawPrint, X } from 'lucide-react';
+import { useState } from 'react';
+import { useAuth } from './AuthProvider';
+
+export function Header() {
+  const [open, setOpen] = useState(false);
+  const { user, logout } = useAuth();
+
+  return (
+    <header className="header">
+      <div className="container nav">
+        <Link className="brand" href="/">
+          <span className="brand-icon"><PawPrint size={21} /></span>
+          <span>PetEncontrado</span>
+        </Link>
+
+        <nav className={open ? 'navlinks open' : 'navlinks'}>
+          <Link href="/">Início</Link>
+          <Link href="/animais">Animais</Link>
+          <Link href="/#como-funciona">Como funciona</Link>
+          <Link href="/#dicas">Dicas</Link>
+
+          {user && <Link href="/cadastrar-animal">Cadastrar ocorrência</Link>}
+          {user && <Link href="/meus-anuncios">Minha conta</Link>}
+          {user?.role === 'ADMIN' && <Link href="/admin">Admin</Link>}
+
+          {user ? (
+            <button className="link-button" onClick={() => logout()}>Sair</button>
+          ) : (
+            <>
+              <Link className="nav-login" href="/login">Entrar</Link>
+              <Link className="nav-cta" href="/cadastro">Cadastrar</Link>
+            </>
+          )}
+        </nav>
+
+        <button className="mobile-menu" onClick={() => setOpen(!open)} aria-label="Abrir menu">
+          {open ? <X /> : <Menu />}
+        </button>
+      </div>
+    </header>
+  );
+}
