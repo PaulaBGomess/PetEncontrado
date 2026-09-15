@@ -2,7 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import helmet from 'helmet';
-import cookieParser from 'cookie-parser';
+import * as cookieParser from 'cookie-parser';
 import { join } from 'path';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
