@@ -17,7 +17,8 @@ async function bootstrap(){
   app.useGlobalPipes(new ValidationPipe({whitelist:true,forbidNonWhitelisted:true,transform:true,transformOptions:{enableImplicitConversion:true}}));
   app.useStaticAssets(join(process.cwd(),'uploads'),{prefix:'/uploads/'});
   const config=new DocumentBuilder().setTitle('PetEncontrado API').setDescription('API REST do Sistema de Animais Perdidos e Encontrados').setVersion('2.0').addBearerAuth().build();
-  SwaggerModule.setup('docs',app,SwaggerModule.createDocument(app,config));
+  const swaggerApp = app as any;
+  SwaggerModule.setup('docs',swaggerApp,SwaggerModule.createDocument(swaggerApp,config));
   app.getHttpAdapter().getInstance().disable('x-powered-by');
   await app.listen(Number(process.env.PORT||3333),'0.0.0.0');
   console.log(`PetEncontrado API: http://localhost:${process.env.PORT||3333}/api/v1`);
