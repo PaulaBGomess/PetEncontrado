@@ -5,7 +5,7 @@
   "scripts": {
     "start:dev": "nest start --watch",
     "build": "nest build",
-    "start:prod": "node dist/main.js",
+    "start:prod": "node dist/src/main.js",
     "test": "jest --runInBand",
     "test:watch": "jest --watch",
     "prisma:generate": "prisma generate",
@@ -21,7 +21,7 @@
     "@nestjs/platform-express": "latest",
     "@nestjs/swagger": "latest",
     "@nestjs/throttler": "latest",
-    "@prisma/client": "latest",
+    "@prisma/client": "6.19.0",
     "bcrypt": "latest",
     "class-transformer": "latest",
     "class-validator": "latest",
@@ -33,7 +33,7 @@
     "passport-jwt": "latest",
     "reflect-metadata": "latest",
     "rxjs": "latest",
-    "prisma": "latest"
+    "prisma": "6.19.0"
   },
   "devDependencies": {
     "@nestjs/cli": "latest",
@@ -47,8 +47,8 @@
     "@types/passport-jwt": "latest",
     "jest": "latest",
     "ts-jest": "latest",
-    "ts-node": "latest",
-    "typescript": "latest"
+    "ts-node": "10.9.2",
+    "typescript": "5.9.3"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"
