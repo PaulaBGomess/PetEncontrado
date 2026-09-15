@@ -53,7 +53,7 @@ services:
       - "3333:3333"
     volumes:
       - pet_uploads:/app/apps/api/uploads
-    command: sh -c "npx prisma migrate deploy && node dist/main.js"
+    command: sh -c "npx prisma migrate deploy && node dist/src/main.js"
 
   web:
     build:
