@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import './reference-ui.css';
+import './home-project.css';
 import './admin-account.css';
 import { AuthProvider } from '@/components/AuthProvider';
 
