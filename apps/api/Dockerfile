@@ -7,7 +7,7 @@ RUN npm install
 COPY apps/api apps/api
 WORKDIR /app/apps/api
 RUN npx prisma generate
-RUN npm run build
+RUN ../../node_modules/.bin/nest build
 
 FROM node:22-alpine AS runner
 WORKDIR /app
