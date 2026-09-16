@@ -8,17 +8,19 @@ import {Header} from '@/components/Header';
 import {Footer} from '@/components/Footer';
 import {apiFetch,imageUrl} from '@/lib/api';
 import {useAuth} from '@/components/AuthProvider';
+import {AnimalCard} from '@/components/AnimalCard';
 
 const labels:any={LOST:'Perdido',FOUND:'Encontrado',REUNITED:'Reunido',CLOSED:'Encerrado',MALE:'Macho',FEMALE:'Fêmea',UNKNOWN:'Não informado',SMALL:'Pequeno',MEDIUM:'Médio',LARGE:'Grande'};
 
 export default function Detail(){
   const{id}=useParams<{id:string}>();
   const[a,setA]=useState<any>(null);
+  const[matches,setMatches]=useState<any[]>([]);
   const[show,setShow]=useState(false);
   const{user,token}=useAuth();
   const router=useRouter();
 
-  useEffect(()=>{apiFetch(`/animals/${id}`).then(setA)},[id]);
+  useEffect(()=>{apiFetch(`/animals/${id}`).then(setA);apiFetch(`/animals/${id}/matches`).then(setMatches).catch(()=>setMatches([]))},[id]);
 
   const mapUrl=useMemo(()=>{
     if(!a?.latitude||!a?.longitude)return '';
@@ -72,7 +74,8 @@ export default function Detail(){
 
           <div className="contact-box">
             <h3>Contato</h3>
-            {wa&&<a className="btn primary" href={wa} target="_blank"><MessageCircle size={18}/>{a.contactWhatsapp||a.contactPhone}</a>}
+            {user&&wa&&<a className="btn primary" href={wa} target="_blank" rel="noreferrer"><MessageCircle size={18}/>Conversar com o responsável</a>}
+            {!user&&<p className="form-sub">Entre na sua conta para proteger os dados de contato e enviar informações com segurança.</p>}
             <button className="btn soft" onClick={()=>user?setShow(!show):router.push('/login')}>Enviar informação / Vi este animal</button>
           </div>
 
@@ -90,6 +93,8 @@ export default function Detail(){
         <div className="map-preview"><iframe title="Localização da ocorrência no OpenStreetMap" src={mapUrl} style={{width:'100%',height:330,border:0}} loading="lazy"/></div>
         <p className="form-sub" style={{marginTop:8}}>Localização aproximada informada no anúncio. Mapa fornecido pelo OpenStreetMap.</p>
       </section>}
+
+      {matches.length>0&&<section className="sightings-box"><div className="section-head"><div><span className="section-label">BUSCA INTELIGENTE</span><h2>Possíveis correspondências</h2><p className="section-sub">Sugestões calculadas por espécie, cidade, bairro, raça, cor, sexo e porte.</p></div></div><div className="animal-grid smart-match-grid">{matches.map((m:any)=><div className="smart-match-card" key={m.id}><div className="match-score">{m.matchScore}% compatível</div><AnimalCard a={m}/><p>{m.matchReasons.join(' • ')}</p></div>)}</div></section>}
 
       {a.sightings?.length>0&&<section className="sightings-box">
         <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}><h2 style={{margin:0}}>Avistamentos ({a.sightings.length})</h2></div>
@@ -110,7 +115,7 @@ function SightingForm({id,token,onDone}:{id:string;token:string;onDone:()=>void}
     try{await apiFetch(`/animals/${id}/sightings`,{method:'POST',body:f},token);setMsg('Informação enviada com sucesso.');e.currentTarget.reset()}catch(err:any){setMsg(err.message)}
   }
   return <form className="panel" style={{marginTop:24}} onSubmit={submit}>
-    <h2>Registrar avistamento</h2>{msg&&<div className="success">{msg}</div>}
+    <h2>Registrar avistamento</h2><p className="form-sub">A localização será exibida publicamente sem seu nome. Seus dados de contato serão enviados somente ao responsável pelo anúncio.</p>{msg&&<div className="success">{msg}</div>}
     <div className="form-grid"><div className="field"><label>Data</label><input name="sightingDate" type="date" required/></div><div className="field"><label>Horário aproximado</label><input name="approximateTime" type="time"/></div><div className="field"><label>Bairro</label><input name="neighborhood" required/></div><div className="field"><label>Cidade</label><input name="city" required/></div><div className="field"><label>Estado</label><input name="state" maxLength={2} required/></div><div className="field"><label>Ponto de referência</label><input name="referencePoint"/></div><div className="field full"><label>Observação</label><textarea name="description"/></div><div className="field full"><label>Foto opcional</label><input type="file" name="photo" accept="image/jpeg,image/png,image/webp"/></div></div>
     <div className="actions"><button className="btn primary">Enviar informação</button><button type="button" className="btn" onClick={onDone}>Fechar</button></div>
   </form>

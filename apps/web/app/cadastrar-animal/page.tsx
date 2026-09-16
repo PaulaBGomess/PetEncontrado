@@ -1,6 +1,6 @@
 "use client";
 
-import {FormEvent,Suspense,useMemo,useState} from 'react';
+import {FormEvent,Suspense,useMemo,useRef,useState} from 'react';
 import {useSearchParams,useRouter} from 'next/navigation';
 import {MapPin,Navigation,UploadCloud} from 'lucide-react';
 import {Header} from '@/components/Header';
@@ -14,7 +14,9 @@ function OccurrenceContent(){
   const[error,setError]=useState('');
   const[loading,setLoading]=useState(false);
   const[locating,setLocating]=useState(false);
+  const[geocoding,setGeocoding]=useState(false);
   const[locationMessage,setLocationMessage]=useState('');
+  const formRef=useRef<HTMLFormElement>(null);
   const[latitude,setLatitude]=useState<number|null>(null);
   const[longitude,setLongitude]=useState<number|null>(null);
 
@@ -47,6 +49,24 @@ function OccurrenceContent(){
     );
   }
 
+  async function locateAddress(){
+    const form=formRef.current;
+    if(!form)return;
+    const data=new FormData(form);
+    const address=[data.get('street'),data.get('neighborhood'),data.get('city'),data.get('state'),'Brasil'].filter(Boolean).join(', ');
+    if(!data.get('city')||!data.get('state')){setLocationMessage('Preencha pelo menos cidade e estado para localizar no mapa.');return}
+    setGeocoding(true);setLocationMessage('');
+    try{
+      const response=await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=br&q=${encodeURIComponent(address)}`,{headers:{'Accept-Language':'pt-BR'}});
+      if(!response.ok)throw new Error();
+      const results=await response.json();
+      if(!results.length){setLocationMessage('Endereço não localizado. Revise os dados ou use sua localização atual.');return}
+      setLatitude(Number(Number(results[0].lat).toFixed(7)));
+      setLongitude(Number(Number(results[0].lon).toFixed(7)));
+      setLocationMessage('Endereço localizado no OpenStreetMap. Confira o ponto antes de publicar.');
+    }catch{setLocationMessage('Não foi possível consultar o OpenStreetMap agora. Tente novamente.')}finally{setGeocoding(false)}
+  }
+
   async function submit(e:FormEvent<HTMLFormElement>){
     e.preventDefault();setLoading(true);setError('');
     const f=new FormData(e.currentTarget);
@@ -62,7 +82,7 @@ function OccurrenceContent(){
       </div>
       {error&&<div className="error">{error}</div>}
 
-      <form onSubmit={submit}>
+      <form ref={formRef} onSubmit={submit}>
         <div className="occurrence-layout">
           <section className="occurrence-main">
             <div className="form-section">
@@ -94,7 +114,8 @@ function OccurrenceContent(){
 
               <input type="hidden" name="latitude" value={latitude??''}/><input type="hidden" name="longitude" value={longitude??''}/>
               <div className="actions" style={{marginTop:16}}>
-                <button type="button" className="btn soft" onClick={useCurrentLocation} disabled={locating}><Navigation size={18}/>{locating?'Localizando...':'Usar minha localização'}</button>
+                <button type="button" className="btn soft" onClick={useCurrentLocation} disabled={locating||geocoding}><Navigation size={18}/>{locating?'Localizando...':'Usar minha localização'}</button>
+                <button type="button" className="btn" onClick={locateAddress} disabled={locating||geocoding}><MapPin size={18}/>{geocoding?'Consultando mapa...':'Localizar endereço no mapa'}</button>
                 {latitude!==null&&longitude!==null&&<span className="meta"><MapPin size={17}/>{latitude.toFixed(5)}, {longitude.toFixed(5)}</span>}
               </div>
               {locationMessage&&<div className={latitude!==null?'success':'error'} style={{marginTop:10}}>{locationMessage}</div>}

@@ -66,7 +66,7 @@ export default function Mine(){
 
       <section className="account-section">
         <div className="section-head"><div><span className="section-label">COLABORAÇÃO</span><h2>Avistamentos recebidos</h2><p className="section-sub">Informações enviadas por outros usuários sobre os animais publicados por você.</p></div></div>
-        {received.length?<div className="table-wrap account-table"><table><thead><tr><th>Animal</th><th>Quem informou</th><th>Local</th><th>Data</th><th>Observação</th></tr></thead><tbody>{received.map(s=><tr key={s.id}><td><b>{s.animal.name||s.animal.species}</b></td><td>{s.reporter.name}</td><td>{s.neighborhood}, {s.city}/{s.state}</td><td>{new Date(s.sightingDate).toLocaleDateString('pt-BR')}</td><td>{s.description||'-'}</td></tr>)}</tbody></table></div>:<div className="empty">Nenhum avistamento recebido até agora.</div>}
+        {received.length?<div className="table-wrap account-table"><table><thead><tr><th>Animal</th><th>Quem informou</th><th>Contato protegido</th><th>Local</th><th>Data</th><th>Observação</th></tr></thead><tbody>{received.map(s=><tr key={s.id}><td><b>{s.animal.name||s.animal.species}</b></td><td>{s.reporter.name}</td><td>{s.reporter.whatsapp?<a href={`https://wa.me/55${String(s.reporter.whatsapp).replace(/\D/g,'')}`} target="_blank" rel="noreferrer">WhatsApp</a>:s.reporter.email?<a href={`mailto:${s.reporter.email}`}>E-mail</a>:'Não informado'}</td><td>{s.neighborhood}, {s.city}/{s.state}</td><td>{new Date(s.sightingDate).toLocaleDateString('pt-BR')}</td><td>{s.description||'-'}</td></tr>)}</tbody></table></div>:<div className="empty">Nenhum avistamento recebido até agora.</div>}
       </section>
     </main>
   </>;

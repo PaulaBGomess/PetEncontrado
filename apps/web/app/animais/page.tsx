@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, Suspense, useEffect, useState } from 'react';
+import Link from 'next/link';
 import { Search } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import { Header } from '@/components/Header';
@@ -50,16 +51,22 @@ function AnimalsContent(){
           <option value="FOUND">Encontrados</option>
           <option value="REUNITED">Reunidos</option>
         </select>
-        <input name="species" placeholder="Tipo de animal"/>
-        <input name="city" placeholder="Cidade"/>
+        <input name="species" defaultValue={params.get('species')||''} placeholder="Espécie"/>
+        <input name="breed" defaultValue={params.get('breed')||''} placeholder="Raça"/>
+        <input name="color" defaultValue={params.get('color')||''} placeholder="Cor"/>
+        <input name="city" defaultValue={params.get('city')||''} placeholder="Cidade"/>
+        <input name="neighborhood" defaultValue={params.get('neighborhood')||''} placeholder="Bairro"/>
+        <select name="sex" defaultValue={params.get('sex')||''}><option value="">Todos os sexos</option><option value="MALE">Macho</option><option value="FEMALE">Fêmea</option><option value="UNKNOWN">Não informado</option></select>
+        <select name="size" defaultValue={params.get('size')||''}><option value="">Todos os portes</option><option value="SMALL">Pequeno</option><option value="MEDIUM">Médio</option><option value="LARGE">Grande</option><option value="UNKNOWN">Não informado</option></select>
         <button className="btn primary"><Search size={16}/> Buscar</button>
+        <Link className="btn" href="/animais">Limpar filtros</Link>
       </form>
 
       <div className="filter-chips">
-        <div className="filter-chip">Todos</div>
-        <div className="filter-chip lost">Perdidos</div>
-        <div className="filter-chip found">Encontrados</div>
-        <div className="filter-chip reunited">Reunidos</div>
+        <Link className="filter-chip" href="/animais">Todos</Link>
+        <Link className="filter-chip lost" href="/animais?situation=LOST">Perdidos</Link>
+        <Link className="filter-chip found" href="/animais?situation=FOUND">Encontrados</Link>
+        <Link className="filter-chip reunited" href="/animais?situation=REUNITED">Reunidos</Link>
       </div>
 
       {loading?<div className="loading">Carregando...</div>:data.length?<div className="animal-grid">{data.map(a=><AnimalCard key={a.id} a={a}/>)}</div>:<div className="empty">Nenhuma ocorrência encontrada.</div>}

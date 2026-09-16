@@ -15,6 +15,8 @@ export default function Admin() {
   const [animals, setAnimals] = useState<any[]>([]);
   const [logs, setLogs] = useState<any[]>([]);
   const [query, setQuery] = useState('');
+  const [animalQuery, setAnimalQuery] = useState('');
+  const [animalSituation, setAnimalSituation] = useState('');
   const [busy, setBusy] = useState<string | null>(null);
   const [message, setMessage] = useState('');
   const router = useRouter();
@@ -45,6 +47,17 @@ export default function Admin() {
     );
   }, [query, users]);
 
+  const filteredAnimals = useMemo(() => {
+    const q = animalQuery.trim().toLowerCase();
+    return animals.filter((a) => {
+      const matchesText = !q || [a.name, a.species, a.breed, a.city, a.state, a.neighborhood, a.owner?.name, a.owner?.email]
+        .filter(Boolean)
+        .some((v) => String(v).toLowerCase().includes(q));
+      const matchesSituation = !animalSituation || a.situation === animalSituation;
+      return matchesText && matchesSituation;
+    });
+  }, [animalQuery, animalSituation, animals]);
+
   async function changeStatus(id: string, status: string) {
     if (!token) return;
     setBusy(`status-${id}`); setMessage('');
@@ -69,14 +82,15 @@ export default function Admin() {
     finally { setBusy(null); }
   }
 
-  async function closeAnimal(id: string) {
+  async function changeAnimalSituation(id: string, situation: string) {
     if (!token) return;
+    if (!window.confirm('Confirma a alteração da situação deste anúncio?')) return;
     setBusy(`animal-${id}`); setMessage('');
     try {
-      await apiFetch(`/animals/${id}/status`, { method: 'PATCH', body: JSON.stringify({ situation: 'CLOSED' }) }, token);
-      setMessage('Anúncio encerrado com sucesso.');
+      await apiFetch(`/animals/${id}/status`, { method: 'PATCH', body: JSON.stringify({ situation }) }, token);
+      setMessage('Situação do anúncio atualizada com sucesso.');
       await load();
-    } catch (e: any) { setMessage(e.message || 'Não foi possível encerrar o anúncio.'); }
+    } catch (e: any) { setMessage(e.message || 'Não foi possível atualizar o anúncio.'); }
     finally { setBusy(null); }
   }
 
@@ -116,9 +130,9 @@ export default function Admin() {
       </section>
 
       <section className="admin-section-card">
-        <div className="admin-section-head"><div><span className="section-label">OCORRÊNCIAS</span><h2>Anúncios publicados</h2><p>Acompanhe os registros ativos e encerrados.</p></div></div>
+        <div className="admin-section-head"><div><span className="section-label">OCORRÊNCIAS</span><h2>Anúncios publicados</h2><p>Pesquise, filtre e modere os registros da plataforma.</p></div><div className="admin-filter-group"><div className="admin-search"><Search size={18}/><input value={animalQuery} onChange={(e)=>setAnimalQuery(e.target.value)} placeholder="Animal, tutor ou cidade..."/></div><select value={animalSituation} onChange={(e)=>setAnimalSituation(e.target.value)}><option value="">Todas as situações</option><option value="LOST">Perdidos</option><option value="FOUND">Encontrados</option><option value="REUNITED">Reunidos</option><option value="CLOSED">Encerrados</option></select></div></div>
         <div className="table-wrap admin-table"><table><thead><tr><th>Animal</th><th>Tutor</th><th>Cidade</th><th>Situação</th><th>Avistamentos</th><th>Ação</th></tr></thead><tbody>
-          {animals.map((a)=><tr key={a.id}><td><Link href={`/animais/${a.id}`}><b>{a.name||a.species}</b></Link></td><td>{a.owner.name}</td><td>{a.city}/{a.state}</td><td><span className={`status ${String(a.situation).toLowerCase()}`}>{a.situation}</span></td><td>{a._count.sightings}</td><td>{a.situation!=='CLOSED'&&<button className="btn danger" disabled={busy===`animal-${a.id}`} onClick={()=>closeAnimal(a.id)}>Encerrar</button>}</td></tr>)}
+          {filteredAnimals.map((a)=><tr key={a.id}><td><Link href={`/animais/${a.id}`}><b>{a.name||a.species}</b></Link><small style={{display:'block',color:'#64748b'}}>{a.species}{a.breed?` • ${a.breed}`:''}</small></td><td>{a.owner.name}<small style={{display:'block',color:'#64748b'}}>{a.owner.email}</small></td><td>{a.neighborhood}, {a.city}/{a.state}</td><td><select value={a.situation} disabled={busy===`animal-${a.id}`} onChange={(e)=>changeAnimalSituation(a.id,e.target.value)}><option value="LOST">Perdido</option><option value="FOUND">Encontrado</option><option value="REUNITED">Reunido</option><option value="CLOSED">Encerrado</option></select></td><td>{a._count.sightings}</td><td><Link className="btn" href={`/animais/${a.id}`}>Visualizar</Link></td></tr>)}
         </tbody></table></div>
       </section>
 
