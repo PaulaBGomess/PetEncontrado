@@ -16,15 +16,18 @@ export default function Home() {
     <section className="hero hero-project">
       <div className="container hero-project-grid">
         <div className="hero-copy">
-          <span className="hero-kicker">🐾 Animais conectam pessoas</span>
-          <h1>Juntos por<br/><span>mais reencontros</span></h1>
-          <p>O <b>PetEncontrado</b> conecta pessoas para localizar animais perdidos, divulgar animais encontrados e aumentar as chances de um final feliz.</p>
+          <span className="hero-kicker">CADA ANIMAL IMPORTA</span>
+          <h1>Ajude a transformar<br/>desespero em <span>reencontro♡</span></h1>
+          <p>O <b>PetEncontrado</b> é uma plataforma para divulgar e encontrar animais perdidos ou encontrados. Juntos, podemos levar mais pets de volta para casa.</p>
           <div className="actions"><Link className="btn primary" href="/animais"><Search size={18}/> Ver animais</Link><Link className="btn soft" href="/cadastrar-animal"><Megaphone size={18}/> Cadastrar ocorrência</Link></div>
           <div className="hero-benefits"><span><Users/> Comunidade engajada</span><span><ShieldCheck/> Mais segurança</span><span><Heart/> Histórias de reencontro</span><span><MapPin/> Impacto local</span></div>
+          <div className="hero-handnote">♡ Pequenas atitudes fazem grandes reencontros!</div>
         </div>
-        <div className="hero-real-photo" role="img" aria-label="Cachorro e gato representando os animais atendidos pelo PetEncontrado"><div className="hero-photo-note">Todo animal<br/>merece voltar<br/>para casa ♡</div><div className="hero-photo-badge">🐾 Pequenos atos,<br/>grandes reencontros</div></div>
+        <div className="hero-real-photo" role="img" aria-label="Cachorro e gato representando os animais atendidos pelo PetEncontrado"><div className="hero-photo-note">Eles também<br/>fazem parte<br/>da família ♡</div><div className="hero-photo-badge">🐾 Adote<br/>essa ideia</div></div>
       </div>
     </section>
+
+    <section className="home-stats"><div className="container home-stats-grid"><article><span>🐾</span><div><b>Animais cadastrados</b><small>Ocorrências reunidas em um só lugar</small></div></article><article><span>♡</span><div><b>Histórias de reencontro</b><small>Comunidade ajudando comunidade</small></div></article><article><span>◎</span><div><b>Localização inteligente</b><small>Mapa para apoiar as buscas</small></div></article><article><span>♥</span><div><b>Impacto social</b><small>Tecnologia a serviço dos animais</small></div></article></div></section>
 
     <section className="section recent-section"><div className="container"><div className="section-head"><div><span className="section-label">ANIMAIS EM DESTAQUE</span><h2>Ajude um animal a voltar para casa</h2><p className="section-sub">Confira os registros mais recentes publicados pela comunidade.</p></div><Link className="btn" href="/animais">Ver todos</Link></div><div className="animal-grid">{data.map(a=><AnimalCard key={a.id} a={a}/>)}</div></div></section>
 
